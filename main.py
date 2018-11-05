@@ -39,7 +39,8 @@ class MultiFileParser:
 def generate():
     parser = argparse.ArgumentParser(description='CATS code generator')
     parser.add_argument('-i', '--input', help='the input CATS file', required=True)
-    parser.add_argument('-o', '--output', help='the output language of the generated files', required=True, choices=list(AVAILABLE_LANGUAGES.keys()))
+    parser.add_argument('-o', '--output', help='the output language of the generated files',
+                        required=True, choices=list(AVAILABLE_LANGUAGES.keys()))
     args = parser.parse_args()
 
     file_parser = MultiFileParser()
