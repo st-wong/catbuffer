@@ -3,7 +3,7 @@ import sys
 import unittest
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
-from generated.py import catbuffer_generated_output as generated_python
+from _generated.py import catbuffer_generated_output as generated_python
 
 
 class TestBufferToUintFunction(unittest.TestCase):
