@@ -263,7 +263,7 @@ class EntityBodyBufferClass(unittest.TestCase):
 
         self.assertEqual(buffer.signer, signer_buffer)
         self.assertEqual(buffer.version, version_buffer)
-        self.assertEqual(buffer.type,  type_buffer)
+        self.assertEqual(buffer.type, type_buffer)
         self.assertEqual(len(consumable_buffer.binary), consumable_buffer.offset)
 
     def test_serialize_outputs_a_valid_formatted_buffer(self):
