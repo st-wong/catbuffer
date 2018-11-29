@@ -4,9 +4,6 @@ SUFFIX = 'Transaction'
 
 
 class ImplementationGenerator(CppGenerator):
-    def __init__(self, schema, name):
-        super(ImplementationGenerator, self).__init__(schema, name)
-
     def _add_includes(self):
         self.append('#include "{BUILDER_NAME}.h"')
         self.append('')
@@ -25,23 +22,31 @@ class ImplementationGenerator(CppGenerator):
         if field_kind == FieldKind.SIMPLE:
             self.append('m_{NAME} = {NAME};'.format(NAME=param_name))
         elif field_kind == FieldKind.BUFFER:
-            self.append("""if (0 == {NAME}.Size)
-\tCATAPULT_THROW_INVALID_ARGUMENT("argument cannot be empty");
+            self.append('''if (0 == {NAME}.Size)
+\tCATAPULT_THROW_INVALID_ARGUMENT("argument `{NAME}` cannot be empty");
 
 if (!m_{NAME}.empty())
-\tCATAPULT_THROW_RUNTIME_ERROR("field already set");
+\tCATAPULT_THROW_RUNTIME_ERROR("`{NAME}` field already set");
 
 m_{NAME}.resize({NAME}.Size);
-m_{NAME}.assign({NAME}.pData, {NAME}.pData + {NAME}.Size);""".format(NAME=param_name))
+m_{NAME}.assign({NAME}.pData, {NAME}.pData + {NAME}.Size);'''.format(NAME=param_name))
         else:
-            self.append('m_{FIELD}.push_back({PARAM});'.format(FIELD=field['name'], PARAM=param_name))
+            if 'sort_key' in field:
+                format_string = 'InsertSorted(m_{FIELD}, {PARAM}, [](const auto& lhs, const auto& rhs) {{{{'
+                self.append(format_string.format(FIELD=field['name'], PARAM=param_name))
+                self.indent += 1
+                self.append('return lhs.{SORT_KEY} < rhs.{SORT_KEY};'.format(SORT_KEY=capitalize(field['sort_key'])))
+                self.indent -= 1
+                self.append('}});')
+            else:
+                self.append('m_{FIELD}.push_back({PARAM});'.format(FIELD=field['name'], PARAM=param_name))
         self.indent -= 1
         self.append('}}\n')
 
     def _generate_field(self, field_kind, field, builder_field_typename):
         pass
 
-    def _generate_build_variable_fields_size(self, field):
+    def _generate_build_variable_fields_size(self, variable_sizes, field):
         field_kind = CppGenerator._get_field_kind(field)
         formatted_vector_size = 'm_{NAME}.size()'.format(NAME=field['name'])
         if field_kind == FieldKind.BUFFER:
@@ -52,7 +57,7 @@ m_{NAME}.assign({NAME}.pData, {NAME}.pData + {NAME}.Size);""".format(NAME=param_
             self.append('size += {};'.format(formatted_size))
 
         if field_kind != FieldKind.SIMPLE:
-            self.variable_sizes[field['size']] = formatted_vector_size
+            variable_sizes[field['size']] = formatted_vector_size
 
     def _generate_build_variable_fields(self, field):
         field_kind = CppGenerator._get_field_kind(field)
@@ -84,7 +89,7 @@ m_{NAME}.assign({NAME}.pData, {NAME}.pData + {NAME}.Size);""".format(NAME=param_
 
     @staticmethod
     def byte_size_to_type_name(size):
-        return { 1: 'uint8_t', 2: 'uint16_t', 4: 'uint32_t', '8': 'uint64_t'}[size]
+        return {1: 'uint8_t', 2: 'uint16_t', 4: 'uint32_t', '8': 'uint64_t'}[size]
 
     def _generate_build(self):
         self.append('template<typename TransactionType>')
@@ -94,18 +99,18 @@ m_{NAME}.assign({NAME}.pData, {NAME}.pData + {NAME}.Size);""".format(NAME=param_
         self.append('// 1. allocate, zero (header), set model::Transaction fields')
         self.append('auto size = sizeof(TransactionType);')
         # go through variable data and add it to size, collect sizes
-        self.variable_sizes = {}
-        self._foreach_builder_field(self._generate_build_variable_fields_size)
+        variable_sizes = {}
+        self._foreach_builder_field(lambda field: self._generate_build_variable_fields_size(variable_sizes, field))
         self.append('auto pTransaction = createTransaction<TransactionType>(size);')
         self.append('')
 
-        self.append('// 2. set transaction fields and sizes')
+        self.append('// 2. set fixed transaction fields')
 
         # set non-variadic fields
-        for field in self.schema[self.transaction_body_name]['layout']:
+        for field in self.schema[self.transaction_body_name()]['layout']:
             template = {'NAME': field['name'], 'TX_FIELD_NAME': capitalize(field['name'])}
             if field['name'].endswith('Size') or field['name'].endswith('Count'):
-                size = self.variable_sizes[field['name']]
+                size = variable_sizes[field['name']]
                 size_type = ImplementationGenerator.byte_size_to_type_name(field['size'])
                 format_string = 'pTransaction->{TX_FIELD_NAME} = utils::checked_cast<size_t, {SIZE_TYPE}>({SIZE});'
                 self.append(format_string.format(**template, SIZE_TYPE=size_type, SIZE=size))
@@ -119,7 +124,7 @@ m_{NAME}.assign({NAME}.pData, {NAME}.pData + {NAME}.Size);""".format(NAME=param_
                     break
         self.append('')
 
-        self.append('// 3. set variable transaction fields')
+        self.append('// 3. set transaction attachments')
         self._foreach_builder_field(self._generate_build_variable_fields)
 
         self.append('')
@@ -128,14 +133,14 @@ m_{NAME}.assign({NAME}.pData, {NAME}.pData + {NAME}.Size);""".format(NAME=param_
         self.append('}}')
 
     def _builds(self):
-        self.append("""std::unique_ptr<{BUILDER_NAME}::Transaction> {BUILDER_NAME}::build() const {{
+        self.append('''std::unique_ptr<{BUILDER_NAME}::Transaction> {BUILDER_NAME}::build() const {{
 \treturn buildImpl<Transaction>();
 }}
 
 std::unique_ptr<{BUILDER_NAME}::EmbeddedTransaction> {BUILDER_NAME}::buildEmbedded() const {{
 \treturn buildImpl<EmbeddedTransaction>();
 }}
-""")
+''')
         self._generate_build()
 
     def _class_footer(self):

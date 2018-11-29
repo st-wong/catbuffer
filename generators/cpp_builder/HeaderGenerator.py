@@ -1,20 +1,16 @@
-from .CppGenerator import CppGenerator, FieldKind, uncapitalize
-import re
+from .CppGenerator import CppGenerator, FieldKind
 
 # note: part of formatting happens in CppGenerator, so whenever literal brace needs
 # to be produced, it needs to be doubled here
 
 
 class HeaderGenerator(CppGenerator):
-    def __init__(self, schema, name):
-        super(HeaderGenerator, self).__init__(schema, name)
-
     def _add_includes(self):
-        self.append("""#pragma once
+        self.append('''#pragma once
 #include "TransactionBuilder.h"
 #include "plugins/txes/{PLUGIN}/src/model/{{TRANSACTION_NAME}}.h"
 #include <vector>
-""".format(PLUGIN=self.hints['plugin']))
+'''.format(PLUGIN=self.hints['plugin']))
 
     def _class_header(self):
         self.append('/// Builder for a {COMMENT_NAME} transaction.')
@@ -31,17 +27,16 @@ class HeaderGenerator(CppGenerator):
         self.append('')
         self.indent -= 1
 
-    def _add_comment(self, field_kind, field):
+    def _add_comment(self, field_kind, field, param_name):
         comments = {
             FieldKind.SIMPLE: 'Sets the {COMMENT} field to \\a {NAME}.',
             FieldKind.BUFFER: 'Sets the {COMMENT} field to \\a {NAME}.',
             FieldKind.VECTOR: 'Adds \\a {NAME} to {COMMENT}.'
         }
-        name = field['name'] if field_kind != FieldKind.VECTOR else uncapitalize(field['type'])
-        self.append('/// ' + comments[field_kind].format(COMMENT=field['comments'], NAME=name))
+        self.append('/// ' + comments[field_kind].format(COMMENT=field['comments'], NAME=param_name))
 
     def _generate_setter(self, field_kind, field, full_setter_name, param_name):
-        self._add_comment(field_kind, field)
+        self._add_comment(field_kind, field, param_name)
         self.append('void {};\n'.format(full_setter_name))
 
     def _setters(self):
@@ -53,19 +48,19 @@ class HeaderGenerator(CppGenerator):
     def _builds(self):
         self.append('public:')
         self.indent += 1
-        self.append("""/// Builds a new {COMMENT_NAME} transaction.
+        self.append('''/// Builds a new {COMMENT_NAME} transaction.
 std::unique_ptr<Transaction> build() const;
 
 /// Builds a new embedded {COMMENT_NAME} transaction.
 std::unique_ptr<EmbeddedTransaction> buildEmbedded() const;
-""")
+''')
         self.indent -= 1
 
         self.append('private:')
         self.indent += 1
-        self.append("""template<typename TTransaction>
+        self.append('''template<typename TTransaction>
 std::unique_ptr<TTransaction> buildImpl() const;
-""")
+''')
         self.indent -= 1
 
     def _generate_field(self, field_kind, field, builder_field_typename):
