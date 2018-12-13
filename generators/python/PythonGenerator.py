@@ -1,6 +1,6 @@
-from generators.Descriptor import Descriptor
-from enum import Enum
 import copy
+from enum import Enum
+from generators.Descriptor import Descriptor
 
 
 class TypeDescriptorType(Enum):
@@ -19,15 +19,15 @@ def indent(code, n_indents=1):
 
 
 class PythonMethodGenerator:
-    def __init__(self, signature, params=[], static=False, is_class=False):
-        self.signature = signature
+    def __init__(self, name, params=[], static=False, is_class=False):
+        self.name = name
         copied_params = copy.deepcopy(params)
         if is_class:
             copied_params.insert(0, 'self')
         if static:
-            self.method_output = ['@staticmethod', 'def {}({}):'.format(self.signature, ', '.join(copied_params))]
+            self.method_output = ['@staticmethod', 'def {}({}):'.format(self.name, ', '.join(copied_params))]
         else:
-            self.method_output = ['def {}({}):'.format(self.signature, ', '.join(copied_params))]
+            self.method_output = ['def {}({}):'.format(self.name, ', '.join(copied_params))]
 
     def add_instructions(self, instructions):
         for instruction in instructions:
@@ -39,20 +39,20 @@ class PythonMethodGenerator:
 
 class PythonClassGenerator:
     @staticmethod
-    def get_generated_class_signature(signature):
-        return '{}Buffer'.format(signature)
+    def get_generated_class_name(name):
+        return '{}Buffer'.format(name)
 
     @staticmethod
-    def get_generated_getter_signature(attribute):
+    def get_generated_getter_name(attribute):
         return 'get_{}'.format(attribute.lower())
 
     @staticmethod
-    def get_generated_setter_signature(attribute):
+    def get_generated_setter_name(attribute):
         return 'set_{}'.format(attribute.lower())
 
-    def __init__(self, signature):
-        self.class_signature = PythonClassGenerator.get_generated_class_signature(signature)
-        self.class_output = ['class {}:'.format(self.class_signature)]
+    def __init__(self, name):
+        self.class_name = PythonClassGenerator.get_generated_class_name(name)
+        self.class_output = ['class {}:'.format(self.class_name)]
 
     def add_constructor(self, initial_values, params=[]):
         params.insert(0, 'self')
@@ -63,14 +63,14 @@ class PythonClassGenerator:
 
     def _add_getter(self, attribute):
         new_getter = PythonMethodGenerator(
-            PythonClassGenerator.get_generated_getter_signature(attribute),
+            PythonClassGenerator.get_generated_getter_name(attribute),
             is_class=True)
         new_getter.add_instructions(['return self.{0}'.format(attribute)])
         self.add_method(new_getter)
 
     def _add_setter(self, attribute):
         new_setter = PythonMethodGenerator(
-            PythonClassGenerator.get_generated_setter_signature(attribute),
+            PythonClassGenerator.get_generated_setter_name(attribute),
             [attribute],
             is_class=True)
         new_setter.add_instructions(['self.{0} = {0}'.format(attribute)])
@@ -113,6 +113,7 @@ class PythonGenerator:
         for attribute in attributes:
             if 'size' in attribute and attribute['size'] == attribute_name:
                 return attribute['name']
+        return None
 
     def _generate_load_from_binary_attributes(self, attributes):
         for attribute in attributes:
@@ -151,7 +152,7 @@ class PythonGenerator:
                                 self.load_from_binary_method.add_instructions([indent(
                                     'new{0} = {1}.load_from_binary(consumable_buffer)'.format(
                                         attribute['name'],
-                                        PythonClassGenerator.get_generated_class_signature(attribute['type'])))])
+                                        PythonClassGenerator.get_generated_class_name(attribute['type'])))])
                             elif attribute_type_descriptor['type'] == TypeDescriptorType.Enum.value:
                                 self.load_from_binary_method.add_instructions([indent(
                                     'new{0} = consumable_buffer.get_bytes({1})'.format(
@@ -166,7 +167,7 @@ class PythonGenerator:
                                 self.load_from_binary_method.add_instructions([
                                     '{0} = {1}.load_from_binary(consumable_buffer)'.format(
                                         attribute['name'],
-                                        PythonClassGenerator.get_generated_class_signature(
+                                        PythonClassGenerator.get_generated_class_name(
                                             attribute['type']))])
                             elif attribute_type_descriptor['type'] == TypeDescriptorType.Byte.value or \
                                     attribute_type_descriptor['type'] == TypeDescriptorType.Enum.value:
@@ -180,7 +181,7 @@ class PythonGenerator:
 
     def _generate_load_from_binary_method(self, attributes):
         self.load_from_binary_method = PythonMethodGenerator('load_from_binary', ['consumable_buffer'], True)
-        self.load_from_binary_method.add_instructions(['object = {}()'.format(self.new_class.class_signature)])
+        self.load_from_binary_method.add_instructions(['object = {}()'.format(self.new_class.class_name)])
         self._generate_load_from_binary_attributes(attributes)
         self.load_from_binary_method.add_instructions(['return object'])
         self.new_class.add_method(self.load_from_binary_method)
@@ -270,14 +271,14 @@ class PythonGenerator:
                 if self._get_attribute_name_if_sizeof(attribute['name'], attributes) is None:
                     self.new_class.add_getter_setter(attribute['name'])
 
-    def _generate_struct(self, type_descriptor, struct):
+    def _generate_schema(self, type_descriptor, schema):
         self.new_class = PythonClassGenerator(type_descriptor)
         self.constructor_initial_values = {}
-        self._generate_attributes(struct['layout'])
+        self._generate_attributes(schema['layout'])
         if self.constructor_initial_values:
             self.new_class.add_constructor(self.constructor_initial_values)
-        self._generate_load_from_binary_method(struct['layout'])
-        self._generate_serialize_method(struct['layout'])
+        self._generate_load_from_binary_method(schema['layout'])
+        self._generate_serialize_method(schema['layout'])
         return self.new_class.get_class()
 
     def _generate_concat_typed_arrays(self):
@@ -352,6 +353,6 @@ class PythonGenerator:
                 # Using the constant directly, so enum definition unneeded
                 pass
             elif value['type'] == TypeDescriptorType.Struct.value:
-                new_file += self._generate_struct(type_descriptor, value) + ['']
+                new_file += self._generate_schema(type_descriptor, value) + ['']
 
         return new_file

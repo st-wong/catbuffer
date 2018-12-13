@@ -1,3 +1,4 @@
+# pylint: disable=invalid-name
 import os
 import sys
 import unittest
@@ -10,34 +11,34 @@ class TestBufferToUintFunction(unittest.TestCase):
 
     def test_buffer_to_uint_converts_a_1_byte_unsigned_integer(self):
         int8 = 232
-        array8 = bytearray(int8.to_bytes(1, byteorder="little", signed=False))
+        array8 = bytearray(int8.to_bytes(1, byteorder='little', signed=False))
         unsigned_int = generated_python.buffer_to_uint(bytearray(array8))
         self.assertEqual(unsigned_int, int8)
 
         int8 = 0
-        array8 = bytearray(int8.to_bytes(1, byteorder="little", signed=False))
+        array8 = bytearray(int8.to_bytes(1, byteorder='little', signed=False))
         unsigned_int = generated_python.buffer_to_uint(bytearray(array8))
         self.assertEqual(unsigned_int, 0)
 
     def test_buffer_to_uint_converts_a_2_byte_unsigned_integer(self):
         int16 = 54345
-        array16 = bytearray(int16.to_bytes(2, byteorder="little", signed=False))
+        array16 = bytearray(int16.to_bytes(2, byteorder='little', signed=False))
         unsigned_int = generated_python.buffer_to_uint(bytearray(array16))
         self.assertEqual(unsigned_int, int16)
 
         int16 = 0
-        array16 = bytearray(int16.to_bytes(2, byteorder="little", signed=False))
+        array16 = bytearray(int16.to_bytes(2, byteorder='little', signed=False))
         unsigned_int = generated_python.buffer_to_uint(bytearray(array16))
         self.assertEqual(unsigned_int, 0)
 
     def test_buffer_to_uint_converts_a_4_byte_unsigned_integer(self):
         int32 = 765435
-        array32 = bytearray(int32.to_bytes(4, byteorder="little", signed=False))
+        array32 = bytearray(int32.to_bytes(4, byteorder='little', signed=False))
         unsigned_int = generated_python.buffer_to_uint(bytearray(array32))
         self.assertEqual(unsigned_int, int32)
 
         int32 = 0
-        array32 = bytearray(int32.to_bytes(4, byteorder="little", signed=False))
+        array32 = bytearray(int32.to_bytes(4, byteorder='little', signed=False))
         unsigned_int = generated_python.buffer_to_uint(bytearray(array32))
         self.assertEqual(unsigned_int, 0)
 
