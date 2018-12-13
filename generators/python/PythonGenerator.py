@@ -115,168 +115,103 @@ class PythonGenerator:
                 return attribute['name']
         return None
 
-    def _generate_load_from_binary_attributes(self, attributes):
+    def _recurse_inlines(self, generate_attribute_method, attributes):
         for attribute in attributes:
             if 'disposition' in attribute:
                 if attribute['disposition'] == TypeDescriptorDisposition.Inline.value:
-                    self._generate_load_from_binary_attributes(self.schema[attribute['type']]['layout'])
+                    self._recurse_inlines(generate_attribute_method, self.schema[attribute['type']]['layout'])
                 elif attribute['disposition'] == TypeDescriptorDisposition.Const.value:
                     pass
             else:
-                sizeof_attribute_name = self._get_attribute_name_if_sizeof(attribute['name'], attributes)
-                if sizeof_attribute_name is not None:
-                    self.load_from_binary_method.add_instructions([
-                        '{0} = buffer_to_uint(consumable_buffer.get_bytes({1}))'.format(
-                            attribute['name'], attribute['size'])])
+                generate_attribute_method(attribute, self._get_attribute_name_if_sizeof(attribute['name'], attributes))
+
+    def _generate_load_from_binary_attributes(self, attribute, sizeof_attribute_name):
+        if sizeof_attribute_name is not None:
+            self.load_from_binary_method.add_instructions(['{0} = buffer_to_uint(consumable_buffer.get_bytes({1}))'.format(attribute['name'], attribute['size'])])
+        else:
+            if attribute['type'] == TypeDescriptorType.Byte.value:
+                self.load_from_binary_method.add_instructions(['{0} = consumable_buffer.get_bytes({1})'.format(attribute['name'], self._get_type_size(attribute))])
+                self.load_from_binary_method.add_instructions(['object.{0} = {0}'.format(attribute['name'])])
+
+            # Struct object
+            else:
+                # Required to check if typedef or struct definition (depends if type of typedescriptor is Struct or Byte)
+                attribute_typedescriptor = self.schema[attribute['type']]
+
+                # Array of objects
+                if 'size' in attribute:
+                    # No need to check if attribute['size'] is int (fixed) or a variable reference, because attribute['size'] will either be a number or a previously code generated reference
+                    self.load_from_binary_method.add_instructions(['object.{} = []'.format(attribute['name'])])
+                    self.load_from_binary_method.add_instructions(['for i in range(0, {}):'.format(attribute['size'])])
+                    if attribute_typedescriptor['type'] == TypeDescriptorType.Struct.value:
+                        self.load_from_binary_method.add_instructions([indent('new{0} = {1}.load_from_binary(consumable_buffer)'.format(attribute['name'], PythonClassGenerator.get_generated_class_name(attribute['type'])))])
+                    elif attribute_typedescriptor['type'] == TypeDescriptorType.Enum.value:
+                        self.load_from_binary_method.add_instructions([indent('new{0} = consumable_buffer.get_bytes({1})'.format(attribute['name'], self._get_type_size(attribute_typedescriptor)))])
+                    self.load_from_binary_method.add_instructions([indent('object.{0}.append(new{0})'.format(attribute['name']))])
+
+                # Single object
                 else:
-                    if attribute['type'] == TypeDescriptorType.Byte.value:
-                        self.load_from_binary_method.add_instructions(['{0} = consumable_buffer.get_bytes({1})'.format(
-                            attribute['name'], self._get_type_size(attribute))])
-                        self.load_from_binary_method.add_instructions(['object.{0} = {0}'.format(attribute['name'])])
-
-                    # Struct object
-                    else:
-                        # Required to check if typedef or struct definition (depends if type of typedescriptor is
-                        # Struct or Byte)
-                        attribute_type_descriptor = self.schema[attribute['type']]
-
-                        # Array of objects
-                        if 'size' in attribute:
-                            # No need to check if attribute['size'] is int (fixed) or a variable reference, because
-                            # attribute['size'] will either be a number or a previously code generated reference
-                            self.load_from_binary_method.add_instructions(['object.{} = []'.format(
-                                attribute['name'])])
-                            self.load_from_binary_method.add_instructions(
-                                ['for i in range(0, {}):'.format(attribute['size'])])
-                            if attribute_type_descriptor['type'] == TypeDescriptorType.Struct.value:
-                                self.load_from_binary_method.add_instructions([indent(
-                                    'new{0} = {1}.load_from_binary(consumable_buffer)'.format(
-                                        attribute['name'],
-                                        PythonClassGenerator.get_generated_class_name(attribute['type'])))])
-                            elif attribute_type_descriptor['type'] == TypeDescriptorType.Enum.value:
-                                self.load_from_binary_method.add_instructions([indent(
-                                    'new{0} = consumable_buffer.get_bytes({1})'.format(
-                                        attribute['name'],
-                                        self._get_type_size(attribute_type_descriptor)))])
-                            self.load_from_binary_method.add_instructions(
-                                [indent('object.{0}.append(new{0})'.format(attribute['name']))])
-
-                        # Single object
-                        else:
-                            if attribute_type_descriptor['type'] == TypeDescriptorType.Struct.value:
-                                self.load_from_binary_method.add_instructions([
-                                    '{0} = {1}.load_from_binary(consumable_buffer)'.format(
-                                        attribute['name'],
-                                        PythonClassGenerator.get_generated_class_name(
-                                            attribute['type']))])
-                            elif attribute_type_descriptor['type'] == TypeDescriptorType.Byte.value or \
-                                    attribute_type_descriptor['type'] == TypeDescriptorType.Enum.value:
-                                self.load_from_binary_method.add_instructions([
-                                    '{0} = consumable_buffer.get_bytes({1})'.format(
-                                        attribute['name'],
-                                        self._get_type_size(
-                                            attribute_type_descriptor))])
-                            self.load_from_binary_method.add_instructions(
-                                ['object.{0} = {0}'.format(attribute['name'])])
+                    if attribute_typedescriptor['type'] == TypeDescriptorType.Struct.value:
+                        self.load_from_binary_method.add_instructions(['{0} = {1}.load_from_binary(consumable_buffer)'.format(attribute['name'], PythonClassGenerator.get_generated_class_name(attribute['type']))])
+                    elif attribute_typedescriptor['type'] == TypeDescriptorType.Byte.value or attribute_typedescriptor['type'] == TypeDescriptorType.Enum.value:
+                        self.load_from_binary_method.add_instructions(['{0} = consumable_buffer.get_bytes({1})'.format(attribute['name'], self._get_type_size(attribute_typedescriptor))])
+                    self.load_from_binary_method.add_instructions(['object.{0} = {0}'.format(attribute['name'])])
 
     def _generate_load_from_binary_method(self, attributes):
         self.load_from_binary_method = PythonMethodGenerator('load_from_binary', ['consumable_buffer'], True)
         self.load_from_binary_method.add_instructions(['object = {}()'.format(self.new_class.class_name)])
-        self._generate_load_from_binary_attributes(attributes)
+        self._recurse_inlines(self._generate_load_from_binary_attributes, attributes)
         self.load_from_binary_method.add_instructions(['return object'])
         self.new_class.add_method(self.load_from_binary_method)
 
-    def _generate_serialize_attributes(self, attributes):
-        for attribute in attributes:
-            if 'disposition' in attribute:
-                if attribute['disposition'] == TypeDescriptorDisposition.Inline.value:
-                    self._generate_serialize_attributes(self.schema[attribute['type']]['layout'])
-                elif attribute['disposition'] == TypeDescriptorDisposition.Const.value:
-                    pass
-            else:
-                sizeof_attribute_name = self._get_attribute_name_if_sizeof(attribute['name'], attributes)
-                if sizeof_attribute_name is not None:
-                    self.serialize_method.add_instructions([
-                        'new_array = concat_typed_arrays(new_array, uint_to_buffer(len(self.{0}), {1}))'.format(
-                            sizeof_attribute_name, attribute['size'])])
+    def _generate_serialize_attributes(self, attribute, sizeof_attribute_name):
+        if sizeof_attribute_name is not None:
+            self.serialize_method.add_instructions(['new_array = concat_typed_arrays(new_array, uint_to_buffer(len(self.{0}), {1}))'.format(sizeof_attribute_name, attribute['size'])])
+        else:
+            if attribute['type'] == TypeDescriptorType.Byte.value:
+                if isinstance(attribute['size'], int):
+                    self.serialize_method.add_instructions(['fit_array{0} = fit_byte_array(self.{0}, {1})'.format(attribute['name'], self._get_type_size(attribute))])
+                    self.serialize_method.add_instructions(['new_array = concat_typed_arrays(new_array, fit_array{})'.format(attribute['name'])])
                 else:
-                    if attribute['type'] == TypeDescriptorType.Byte.value:
-                        if isinstance(attribute['size'], int):
-                            self.serialize_method.add_instructions([
-                                'fit_array_{0} = fit_byte_array(self.{0}, {1})'.format(
-                                    attribute['name'],
-                                    self._get_type_size(attribute))])
-                            self.serialize_method.add_instructions(
-                                ['new_array = concat_typed_arrays(new_array, fit_array_{})'.format(attribute['name'])])
-                        else:
-                            self.serialize_method.add_instructions(
-                                ['new_array = concat_typed_arrays(new_array, self.{})'.format(attribute['name'])])
+                    self.serialize_method.add_instructions(['new_array = concat_typed_arrays(new_array, self.{})'.format(attribute['name'])])
 
-                    # Struct object
-                    else:
-                        # Required to check if typedef or struct definition (depends if type of typedescriptor is
-                        # Struct or Byte)
-                        attribute_type_descriptor = self.schema[attribute['type']]
+            # Struct object
+            else:
+                # Required to check if typedef or struct definition (depends if type of typedescriptor is Struct or Byte)
+                attribute_typedescriptor = self.schema[attribute['type']]
 
-                        # Array of objects
-                        if 'size' in attribute:
-                            # No need to check if attribute['size'] is int (fixed) or a variable reference, because we
-                            # iterate with a for util in both cases
-                            self.serialize_method.add_instructions(
-                                ['for element in self.{}:'.format(attribute['name'])])
-                            if attribute_type_descriptor['type'] == TypeDescriptorType.Struct.value:
-                                self.serialize_method.add_instructions([indent(
-                                    'new_array = concat_typed_arrays(new_array, element.serialize())'.format(
-                                        attribute['name']))])
-                            elif attribute_type_descriptor['type'] == TypeDescriptorType.Enum.value:
-                                self.serialize_method.add_instructions([indent(
-                                    'fit_array_{0} = fit_byte_array(self.{0}, {1})'.format(
-                                        attribute['name'],
-                                        self._get_type_size(attribute_type_descriptor)))])
-                                self.serialize_method.add_instructions([indent(
-                                    'new_array = concat_typed_arrays(new_array, fit_array_{})'.format(
-                                        attribute['name']))])
+                # Array of objects
+                if 'size' in attribute:
+                    # No need to check if attribute['size'] is int (fixed) or a variable reference, because we iterate with a for util in both cases
+                    self.serialize_method.add_instructions(['for attribute in self.{}:'.format(attribute['name'])])
+                    if attribute_typedescriptor['type'] == TypeDescriptorType.Struct.value:
+                        self.serialize_method.add_instructions([indent('new_array = concat_typed_arrays(new_array, attribute.serialize())'.format(attribute['name']))])
+                    elif attribute_typedescriptor['type'] == TypeDescriptorType.Enum.value:
+                        self.serialize_method.add_instructions([indent('fit_array{0} = fit_byte_array(self.{0}, {1})'.format(attribute['name'], self._get_type_size(attribute_typedescriptor)))])
+                        self.serialize_method.add_instructions([indent('new_array = concat_typed_arrays(new_array, fit_array{})'.format(attribute['name']))])
 
-                        # Single object
-                        else:
-                            if attribute_type_descriptor['type'] == TypeDescriptorType.Struct.value:
-                                self.serialize_method.add_instructions([
-                                    'new_array = concat_typed_arrays(new_array, self.{}.serialize())'.format(
-                                        attribute['name'])])
-                            elif attribute_type_descriptor['type'] == TypeDescriptorType.Byte.value or \
-                                    attribute_type_descriptor['type'] == TypeDescriptorType.Enum.value:
-                                self.serialize_method.add_instructions([
-                                    'fit_array_{0} = fit_byte_array(self.{0}, {1})'.format(
-                                        attribute['name'], self._get_type_size(
-                                            attribute_type_descriptor))])
-                                self.serialize_method.add_instructions([
-                                    'new_array = concat_typed_arrays(new_array, fit_array_{})'.format(
-                                        attribute['name'])])
+                # Single object
+                else:
+                    if attribute_typedescriptor['type'] == TypeDescriptorType.Struct.value:
+                        self.serialize_method.add_instructions(['new_array = concat_typed_arrays(new_array, self.{}.serialize())'.format(attribute['name'])])
+                    elif attribute_typedescriptor['type'] == TypeDescriptorType.Byte.value or attribute_typedescriptor['type'] == TypeDescriptorType.Enum.value:
+                        self.serialize_method.add_instructions(['fit_array{0} = fit_byte_array(self.{0}, {1})'.format(attribute['name'], self._get_type_size(attribute_typedescriptor))])
+                        self.serialize_method.add_instructions(['new_array = concat_typed_arrays(new_array, fit_array{})'.format(attribute['name'])])
 
     def _generate_serialize_method(self, attributes):
         self.serialize_method = PythonMethodGenerator('serialize', is_class=True)
         self.serialize_method.add_instructions(['new_array = bytearray()'])
-        self._generate_serialize_attributes(attributes)
+        self._recurse_inlines(self._generate_serialize_attributes, attributes)
         self.serialize_method.add_instructions(['return new_array'])
         self.new_class.add_method(self.serialize_method)
 
-    def _generate_attributes(self, attributes):
-        for attribute in attributes:
-            if 'disposition' in attribute:
-                if attribute['disposition'] == TypeDescriptorDisposition.Inline.value:
-                    self._generate_attributes(self.schema[attribute['type']]['layout'])
-                elif attribute['disposition'] == TypeDescriptorDisposition.Const.value:
-                    pass
-            else:
-                if self._get_attribute_name_if_sizeof(attribute['name'], attributes) is None:
-                    self.new_class.add_getter_setter(attribute['name'])
+    def _generate_attributes(self, attribute, sizeof_attribute_name):
+        if sizeof_attribute_name is None:
+            self.new_class.add_getter_setter(attribute['name'])
 
     def _generate_schema(self, type_descriptor, schema):
         self.new_class = PythonClassGenerator(type_descriptor)
-        self.constructor_initial_values = {}
-        self._generate_attributes(schema['layout'])
-        if self.constructor_initial_values:
-            self.new_class.add_constructor(self.constructor_initial_values)
+        self._recurse_inlines(self._generate_attributes, schema['layout'])
         self._generate_load_from_binary_method(schema['layout'])
         self._generate_serialize_method(schema['layout'])
         return self.new_class.get_class()
