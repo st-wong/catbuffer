@@ -1,5 +1,4 @@
-# pylint: disable=invalid-name
-# pylint: disable=wrong-import-position
+# pylint: disable=invalid-name, wrong-import-position, too-many-locals
 import os
 import sys
 import unittest

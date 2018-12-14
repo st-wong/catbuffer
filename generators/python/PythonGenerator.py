@@ -138,7 +138,7 @@ class PythonGenerator:
                     '{0} = consumable_buffer.get_bytes({1})'.format(
                         attribute['name'], self._get_type_size(attribute))
                 ])
-                self.load_from_binary_method.add_instructions(['object.{0} = {0}'.format(attribute['name'])])
+                self.load_from_binary_method.add_instructions(['buffer.{0} = {0}'.format(attribute['name'])])
 
             # Struct object
             else:
@@ -150,7 +150,7 @@ class PythonGenerator:
                 if 'size' in attribute:
                     # No need to check if attribute['size'] is int (fixed) or a variable reference,
                     # because attribute['size'] will either be a number or a previously code generated reference
-                    self.load_from_binary_method.add_instructions(['object.{} = []'.format(attribute['name'])])
+                    self.load_from_binary_method.add_instructions(['buffer.{} = []'.format(attribute['name'])])
                     self.load_from_binary_method.add_instructions(['for _ in range(0, {}):'.format(attribute['size'])])
                     if attribute_typedescriptor['type'] == TypeDescriptorType.Struct.value:
                         self.load_from_binary_method.add_instructions([
@@ -163,7 +163,7 @@ class PythonGenerator:
                                 attribute['name'], self._get_type_size(attribute_typedescriptor)))
                         ])
                     self.load_from_binary_method.add_instructions([
-                        indent('object.{0}.append(new_{0})'.format(attribute['name']))
+                        indent('buffer.{0}.append(new_{0})'.format(attribute['name']))
                     ])
 
                 # Single object
@@ -179,14 +179,14 @@ class PythonGenerator:
                             '{0} = consumable_buffer.get_bytes({1})'.format(
                                 attribute['name'], self._get_type_size(attribute_typedescriptor))
                         ])
-                    self.load_from_binary_method.add_instructions(['object.{0} = {0}'.format(attribute['name'])])
+                    self.load_from_binary_method.add_instructions(['buffer.{0} = {0}'.format(attribute['name'])])
 
     def _generate_load_from_binary_method(self, attributes):
         self.load_from_binary_method = PythonMethodGenerator(
             'load_from_binary', ['consumable_buffer'], decorator='@staticmethod')
-        self.load_from_binary_method.add_instructions(['object = {}()'.format(self.new_class.class_name)])
+        self.load_from_binary_method.add_instructions(['buffer = {}()'.format(self.new_class.class_name)])
         self._recurse_inlines(self._generate_load_from_binary_attributes, attributes, [])
-        self.load_from_binary_method.add_instructions(['return object'])
+        self.load_from_binary_method.add_instructions(['return buffer'])
         self.new_class.add_method(self.load_from_binary_method)
 
     def _generate_serialize_attributes(self, attribute, sizeof_attribute_name):
