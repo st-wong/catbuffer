@@ -1,9 +1,10 @@
 # pylint: disable=invalid-name
+# pylint: disable=wrong-import-position
 import os
 import sys
 import unittest
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..'))  # noqa: E402
 from _generated.py import catbuffer_generated_output as generated_python
 
 
@@ -155,11 +156,13 @@ class TestUint8ArrayConsumableBufferClass(unittest.TestCase):
 
 class TestMosaicBufferClass(unittest.TestCase):
 
-    def test_has_required_getters_and_setters(self):
-        self.assertTrue(callable(getattr(generated_python.MosaicBuffer, 'get_mosaicid')))
-        self.assertTrue(callable(getattr(generated_python.MosaicBuffer, 'set_mosaicid')))
-        self.assertTrue(callable(getattr(generated_python.MosaicBuffer, 'get_amount')))
-        self.assertTrue(callable(getattr(generated_python.MosaicBuffer, 'set_amount')))
+    @staticmethod
+    def test_has_required_getters_and_setters():
+        buffer = generated_python.MosaicBuffer()
+        buffer.get_mosaicid()
+        buffer.set_mosaicid(None)
+        buffer.get_amount()
+        buffer.set_amount(None)
 
     def test_load_from_binary_initializes_from_binary_data(self):
         mosaic_id_buffer = bytes([0xF2, 0x26, 0x6C, 0x06, 0x40, 0x83, 0xB2, 0x92])
@@ -188,9 +191,11 @@ class TestMosaicBufferClass(unittest.TestCase):
 
 class TestSizePrefixedEntityBufferClass(unittest.TestCase):
 
-    def test_has_required_getters_and_setters(self):
-        self.assertTrue(callable(getattr(generated_python.SizePrefixedEntityBuffer, 'get_size')))
-        self.assertTrue(callable(getattr(generated_python.SizePrefixedEntityBuffer, 'set_size')))
+    @staticmethod
+    def test_has_required_getters_and_setters():
+        buffer = generated_python.SizePrefixedEntityBuffer()
+        buffer.get_size()
+        buffer.set_size(None)
 
     def test_load_from_binary_initializes_from_binary_data(self):
         size_buffer = bytes([0xF2, 0x26, 0x6C, 0x06])
@@ -209,9 +214,11 @@ class TestSizePrefixedEntityBufferClass(unittest.TestCase):
 
 class VerifiableEntityBufferClass(unittest.TestCase):
 
-    def test_has_required_getters_and_setters(self):
-        self.assertTrue(callable(getattr(generated_python.VerifiableEntityBuffer, 'get_signature')))
-        self.assertTrue(callable(getattr(generated_python.VerifiableEntityBuffer, 'set_signature')))
+    @staticmethod
+    def test_has_required_getters_and_setters():
+        buffer = generated_python.VerifiableEntityBuffer()
+        buffer.get_signature()
+        buffer.set_signature(None)
 
     def test_load_from_binary_initializes_from_binary_data(self):
         signature_buffer = bytes([
@@ -241,13 +248,15 @@ class VerifiableEntityBufferClass(unittest.TestCase):
 
 class EntityBodyBufferClass(unittest.TestCase):
 
-    def test_has_required_getters_and_setters(self):
-        self.assertTrue(callable(getattr(generated_python.EntityBodyBuffer, 'get_signer')))
-        self.assertTrue(callable(getattr(generated_python.EntityBodyBuffer, 'set_signer')))
-        self.assertTrue(callable(getattr(generated_python.EntityBodyBuffer, 'get_version')))
-        self.assertTrue(callable(getattr(generated_python.EntityBodyBuffer, 'set_version')))
-        self.assertTrue(callable(getattr(generated_python.EntityBodyBuffer, 'get_type')))
-        self.assertTrue(callable(getattr(generated_python.EntityBodyBuffer, 'set_type')))
+    @staticmethod
+    def test_has_required_getters_and_setters():
+        buffer = generated_python.EntityBodyBuffer()
+        buffer.get_signer()
+        buffer.set_signer(None)
+        buffer.get_version()
+        buffer.set_version(None)
+        buffer.get_type()
+        buffer.set_type(None)
 
     def test_load_from_binary_initializes_from_binary_data(self):
         signer_buffer = bytes([0xF5, 0x24, 0x8C, 0xB0, 0x05, 0x49, 0xC6, 0x15, 0xFC, 0x56, 0x13, 0x08, 0xE3,
@@ -284,20 +293,23 @@ class EntityBodyBufferClass(unittest.TestCase):
 
 class TransactionBufferClass(unittest.TestCase):
 
-    def test_has_required_getters_and_setters(self):
-        self.assertTrue(callable(getattr(generated_python.TransactionBuffer, 'get_size')))
-        self.assertTrue(callable(getattr(generated_python.TransactionBuffer, 'set_size')))
-        self.assertTrue(callable(getattr(generated_python.TransactionBuffer, 'get_signature')))
-        self.assertTrue(callable(getattr(generated_python.TransactionBuffer, 'set_signature')))
-        self.assertTrue(callable(getattr(generated_python.TransactionBuffer, 'get_signer')))
-        self.assertTrue(callable(getattr(generated_python.TransactionBuffer, 'set_signer')))
-        self.assertTrue(callable(getattr(generated_python.TransactionBuffer, 'get_version')))
-        self.assertTrue(callable(getattr(generated_python.TransactionBuffer, 'get_type')))
-        self.assertTrue(callable(getattr(generated_python.TransactionBuffer, 'set_type')))
-        self.assertTrue(callable(getattr(generated_python.TransactionBuffer, 'get_fee')))
-        self.assertTrue(callable(getattr(generated_python.TransactionBuffer, 'set_fee')))
-        self.assertTrue(callable(getattr(generated_python.TransactionBuffer, 'get_deadline')))
-        self.assertTrue(callable(getattr(generated_python.TransactionBuffer, 'set_deadline')))
+    @staticmethod
+    def test_has_required_getters_and_setters():
+        buffer = generated_python.TransactionBuffer()
+        buffer.get_size()
+        buffer.set_size(None)
+        buffer.get_signature()
+        buffer.set_signature(None)
+        buffer.get_signer()
+        buffer.set_signer(None)
+        buffer.get_version()
+        buffer.set_version(None)
+        buffer.get_type()
+        buffer.set_type(None)
+        buffer.get_fee()
+        buffer.set_fee(None)
+        buffer.get_deadline()
+        buffer.set_deadline(None)
 
     def test_load_from_binary_initializes_from_binary_data(self):
         size_buffer = bytes([0xF2, 0x26, 0x6C, 0x06])
@@ -371,14 +383,17 @@ class TransactionBufferClass(unittest.TestCase):
 
 class EmbeddedTransactionBufferClass(unittest.TestCase):
 
-    def test_has_required_getters_and_setters(self):
-        self.assertTrue(callable(getattr(generated_python.EmbeddedTransactionBuffer, 'get_size')))
-        self.assertTrue(callable(getattr(generated_python.EmbeddedTransactionBuffer, 'set_size')))
-        self.assertTrue(callable(getattr(generated_python.EmbeddedTransactionBuffer, 'get_signer')))
-        self.assertTrue(callable(getattr(generated_python.EmbeddedTransactionBuffer, 'set_signer')))
-        self.assertTrue(callable(getattr(generated_python.EmbeddedTransactionBuffer, 'get_version')))
-        self.assertTrue(callable(getattr(generated_python.EmbeddedTransactionBuffer, 'get_type')))
-        self.assertTrue(callable(getattr(generated_python.EmbeddedTransactionBuffer, 'set_type')))
+    @staticmethod
+    def test_has_required_getters_and_setters():
+        buffer = generated_python.EmbeddedTransactionBuffer()
+        buffer.get_size()
+        buffer.set_size(None)
+        buffer.get_signer()
+        buffer.set_signer(None)
+        buffer.get_version()
+        buffer.set_version(None)
+        buffer.get_type()
+        buffer.set_type(None)
 
     def test_load_from_binary_initializes_from_binary_data(self):
         size_buffer = bytes([0xF2, 0x26, 0x6C, 0x06])
@@ -421,24 +436,24 @@ class EmbeddedTransactionBufferClass(unittest.TestCase):
 
 class TransferTransactionBodyBufferClass(unittest.TestCase):
 
-    def test_has_required_getters_and_setters(self):
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBodyBuffer, 'get_recipient')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBodyBuffer, 'set_recipient')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBodyBuffer, 'get_message')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBodyBuffer, 'set_message')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBodyBuffer, 'get_mosaics')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBodyBuffer, 'set_mosaics')))
+    @staticmethod
+    def test_has_required_getters_and_setters():
+        buffer = generated_python.TransferTransactionBodyBuffer()
+        buffer.get_recipient()
+        buffer.set_recipient(None)
+        buffer.get_message()
+        buffer.set_message(None)
+        buffer.get_mosaics()
+        buffer.set_mosaics(None)
 
     def test_load_from_binary_initializes_from_binary_data(self):
         mosaic_buffer1 = generated_python.MosaicBuffer()
         mosaic_buffer1.mosaicId = bytearray(bytes([0xF2, 0x26, 0x6C, 0x06, 0x40, 0x83, 0xB2, 0x92]))
         mosaic_buffer1.amount = bytearray(bytes([0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44]))
-        mosaic1 = mosaic_buffer1.serialize()
 
         mosaic_buffer2 = generated_python.MosaicBuffer()
         mosaic_buffer2.mosaicId = bytearray(bytes([0xF2, 0x26, 0x6C, 0x06, 0x40, 0x83, 0xB2, 0x92]))
         mosaic_buffer2.amount = bytearray(bytes([0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44]))
-        mosaic2 = mosaic_buffer2.serialize()
 
         recipient_buffer = bytes([0x3E, 0xE9, 0xFA, 0x15, 0xA3, 0xB6, 0x05, 0xDC, 0x0C, 0x4C, 0xF7, 0xF1,
                                   0xB1, 0x5A, 0xAB, 0xDC, 0xCC, 0x2E, 0x09, 0x59, 0x38, 0x97, 0xF2, 0x69,
@@ -450,14 +465,14 @@ class TransferTransactionBodyBufferClass(unittest.TestCase):
                                 0xF7, 0xF1, 0xB1, 0x5A, 0xAB, 0xDC, 0xCC, 0x2E, 0x09, 0x59, 0x38, 0x97, 0xF2,
                                 0x69, 0xD9, 0xE2, 0x56, 0x29, 0x2B, 0xF3, 0x52, 0xC0, 0xAA, 0xBB, 0x55, 0xFF,
                                 0x44])
-        mosaics_buffer = mosaic1 + mosaic2
 
         consumable_buffer = generated_python.Uint8ArrayConsumableBuffer(
             bytearray(recipient_buffer
                       + message_size_buffer
                       + mosaics_count_buffer
                       + message_buffer
-                      + mosaics_buffer))
+                      + mosaic_buffer1.serialize()
+                      + mosaic_buffer2.serialize()))
 
         buffer = generated_python.TransferTransactionBodyBuffer.load_from_binary(consumable_buffer)
 
@@ -465,8 +480,8 @@ class TransferTransactionBodyBufferClass(unittest.TestCase):
         self.assertEqual(len(buffer.message), 53)
         self.assertEqual(buffer.message, message_buffer)
         self.assertEqual(len(buffer.mosaics), 2)
-        self.assertEqual(buffer.mosaics[0].serialize(), mosaic1)
-        self.assertEqual(buffer.mosaics[1].serialize(), mosaic2)
+        self.assertEqual(buffer.mosaics[0].serialize(), mosaic_buffer1.serialize())
+        self.assertEqual(buffer.mosaics[1].serialize(), mosaic_buffer2.serialize())
         self.assertEqual(len(consumable_buffer.binary), consumable_buffer.offset)
 
     def test_serialize_outputs_a_valid_formatted_buffer(self):
@@ -474,12 +489,10 @@ class TransferTransactionBodyBufferClass(unittest.TestCase):
         mosaic_buffer1 = generated_python.MosaicBuffer()
         mosaic_buffer1.mosaicId = bytearray(bytes([0xF2, 0x26, 0x6C, 0x06, 0x40, 0x83, 0xB2, 0x92]))
         mosaic_buffer1.amount = bytearray(bytes([0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44]))
-        mosaic1 = mosaic_buffer1.serialize()
 
         mosaic_buffer2 = generated_python.MosaicBuffer()
         mosaic_buffer2.mosaicId = bytearray(bytes([0xF2, 0x26, 0x6C, 0x06, 0x40, 0x83, 0xB2, 0x92]))
         mosaic_buffer2.amount = bytearray(bytes([0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44]))
-        mosaic2 = mosaic_buffer2.serialize()
 
         recipient_buffer = bytes([0x3E, 0xE9, 0xFA, 0x15, 0xA3, 0xB6, 0x05, 0xDC, 0x0C, 0x4C, 0xF7, 0xF1,
                                   0xB1, 0x5A, 0xAB, 0xDC, 0xCC, 0x2E, 0x09, 0x59, 0x38, 0x97, 0xF2, 0x69,
@@ -491,7 +504,6 @@ class TransferTransactionBodyBufferClass(unittest.TestCase):
                                 0xF7, 0xF1, 0xB1, 0x5A, 0xAB, 0xDC, 0xCC, 0x2E, 0x09, 0x59, 0x38, 0x97, 0xF2,
                                 0x69, 0xD9, 0xE2, 0x56, 0x29, 0x2B, 0xF3, 0x52, 0xC0, 0xAA, 0xBB, 0x55, 0xFF,
                                 0x44])
-        mosaics_buffer = mosaic1 + mosaic2
 
         buffer = generated_python.TransferTransactionBodyBuffer()
         buffer.recipient = recipient_buffer
@@ -503,44 +515,45 @@ class TransferTransactionBodyBufferClass(unittest.TestCase):
                          + message_size_buffer
                          + mosaics_count_buffer
                          + message_buffer
-                         + mosaics_buffer)
+                         + mosaic_buffer1.serialize()
+                         + mosaic_buffer2.serialize())
 
 
 class TestTransferTransactionBufferClass(unittest.TestCase):
 
-    def test_has_required_getters_and_setters(self):
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBuffer, 'set_size')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBuffer, 'get_size')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBuffer, 'set_signature')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBuffer, 'get_signature')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBuffer, 'get_mosaics')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBuffer, 'set_signer')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBuffer, 'get_signer')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBuffer, 'set_version')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBuffer, 'get_version')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBuffer, 'set_type')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBuffer, 'get_type')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBuffer, 'set_fee')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBuffer, 'get_fee')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBuffer, 'set_deadline')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBuffer, 'get_deadline')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBuffer, 'set_recipient')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBuffer, 'get_recipient')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBuffer, 'set_message')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBuffer, 'get_message')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBuffer, 'set_mosaics')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBuffer, 'get_mosaics')))
+    @staticmethod
+    def test_has_required_getters_and_setters():
+        buffer = generated_python.TransferTransactionBuffer()
+        buffer.get_size()
+        buffer.set_size(None)
+        buffer.get_signature()
+        buffer.set_signature(None)
+        buffer.get_signer()
+        buffer.set_signer(None)
+        buffer.get_version()
+        buffer.set_version(None)
+        buffer.get_type()
+        buffer.set_type(None)
+        buffer.get_fee()
+        buffer.set_fee(None)
+        buffer.get_deadline()
+        buffer.set_deadline(None)
+        buffer.get_recipient()
+        buffer.set_recipient(None)
+        buffer.get_message()
+        buffer.set_message(None)
+        buffer.get_mosaics()
+        buffer.set_mosaics(None)
 
     def test_load_from_binary_initializes_from_binary_data(self):
         mosaic_buffer1 = generated_python.MosaicBuffer()
         mosaic_buffer1.mosaicId = bytearray(bytes([0xF2, 0x26, 0x6C, 0x06, 0x40, 0x83, 0xB2, 0x92]))
         mosaic_buffer1.amount = bytearray(bytes([0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44]))
-        mosaic1 = mosaic_buffer1.serialize()
 
         mosaic_buffer2 = generated_python.MosaicBuffer()
         mosaic_buffer2.mosaicId = bytearray(bytes([0xF2, 0x26, 0x6C, 0x06, 0x40, 0x83, 0xB2, 0x92]))
         mosaic_buffer2.amount = bytearray(bytes([0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44]))
-        mosaic2 = mosaic_buffer2.serialize()
+
         size_buffer = bytes([0xF2, 0x26, 0x6C, 0x06])
         signature_buffer = bytes([0xF5, 0x24, 0x8C, 0xB0, 0x05, 0x49, 0xC6, 0x15, 0xFC, 0x56, 0x13, 0x08, 0xE3,
                                   0x4B, 0x60, 0xFF, 0x3E, 0xE9, 0xFA, 0x15, 0xA3, 0xB6, 0x05, 0xDC, 0x0C, 0x4C,
@@ -561,7 +574,6 @@ class TestTransferTransactionBufferClass(unittest.TestCase):
         mosaics_count_buffer = bytes([0x02])
         message_buffer = bytes([0x05, 0xDC, 0x05, 0xDC, 0x05, 0xDC, 0x05, 0xDC, 0x05, 0xDC, 0x05, 0xDC, 0x05,
                                 0xDC, 0x05, 0xDC, 0x05, 0xDC])
-        mosaics_buffer = mosaic1 + mosaic2
 
         consumable_buffer = generated_python.Uint8ArrayConsumableBuffer(
             bytearray(
@@ -576,7 +588,8 @@ class TestTransferTransactionBufferClass(unittest.TestCase):
                 + message_size_buffer
                 + mosaics_count_buffer
                 + message_buffer
-                + mosaics_buffer))
+                + mosaic_buffer1.serialize()
+                + mosaic_buffer2.serialize()))
 
         buffer = generated_python.TransferTransactionBuffer.load_from_binary(consumable_buffer)
         self.assertEqual(buffer.size, size_buffer)
@@ -589,20 +602,18 @@ class TestTransferTransactionBufferClass(unittest.TestCase):
         self.assertEqual(buffer.recipient, recipient_buffer)
         self.assertEqual(buffer.message, message_buffer)
         self.assertEqual(len(buffer.mosaics), 2)
-        self.assertEqual(buffer.mosaics[0].serialize(), mosaic1)
-        self.assertEqual(buffer.mosaics[1].serialize(), mosaic2)
+        self.assertEqual(buffer.mosaics[0].serialize(), mosaic_buffer1.serialize())
+        self.assertEqual(buffer.mosaics[1].serialize(), mosaic_buffer2.serialize())
         self.assertEqual(len(consumable_buffer.binary), consumable_buffer.offset)
 
     def test_serialize_outputs_a_valid_formatted_buffer(self):
         mosaic_buffer1 = generated_python.MosaicBuffer()
         mosaic_buffer1.mosaicId = bytearray(bytes([0xF2, 0x26, 0x6C, 0x06, 0x40, 0x83, 0xB2, 0x92]))
         mosaic_buffer1.amount = bytearray(bytes([0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44]))
-        mosaic1 = mosaic_buffer1.serialize()
 
         mosaic_buffer2 = generated_python.MosaicBuffer()
         mosaic_buffer2.mosaicId = bytearray(bytes([0xF2, 0x26, 0x6C, 0x06, 0x40, 0x83, 0xB2, 0x92]))
         mosaic_buffer2.amount = bytearray(bytes([0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44]))
-        mosaic2 = mosaic_buffer2.serialize()
 
         size_buffer = bytes([0xF2, 0x26, 0x6C, 0x06])
         signature_buffer = bytes([0xF5, 0x24, 0x8C, 0xB0, 0x05, 0x49, 0xC6, 0x15, 0xFC, 0x56, 0x13, 0x08, 0xE3,
@@ -624,7 +635,6 @@ class TestTransferTransactionBufferClass(unittest.TestCase):
         mosaics_count_buffer = bytes([0x02])
         message_buffer = bytes([0x05, 0xDC, 0x05, 0xDC, 0x05, 0xDC, 0x05, 0xDC, 0x05, 0xDC, 0x05, 0xDC, 0x05,
                                 0xDC, 0x05, 0xDC, 0x05, 0xDC])
-        mosaics_buffer = mosaic1 + mosaic2
 
         buffer = generated_python.TransferTransactionBuffer()
         buffer.size = size_buffer
@@ -651,37 +661,38 @@ class TestTransferTransactionBufferClass(unittest.TestCase):
                          + message_size_buffer
                          + mosaics_count_buffer
                          + message_buffer
-                         + mosaics_buffer)
+                         + mosaic_buffer1.serialize()
+                         + mosaic_buffer2.serialize())
 
 
 class TestEmbeddedTransferTransactionBufferClass(unittest.TestCase):
 
-    def test_has_required_getters_and_setters(self):
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBuffer, 'get_size')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBuffer, 'set_size')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBuffer, 'get_signer')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBuffer, 'set_signer')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBuffer, 'get_version')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBuffer, 'set_version')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBuffer, 'get_type')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBuffer, 'set_type')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBuffer, 'get_recipient')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBuffer, 'set_recipient')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBuffer, 'get_message')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBuffer, 'set_message')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBuffer, 'get_mosaics')))
-        self.assertTrue(callable(getattr(generated_python.TransferTransactionBuffer, 'set_mosaics')))
+    @staticmethod
+    def test_has_required_getters_and_setters():
+        buffer = generated_python.EmbeddedTransferTransactionBuffer()
+        buffer.get_size()
+        buffer.set_size(None)
+        buffer.get_signer()
+        buffer.set_signer(None)
+        buffer.get_version()
+        buffer.set_version(None)
+        buffer.get_type()
+        buffer.set_type(None)
+        buffer.get_recipient()
+        buffer.set_recipient(None)
+        buffer.get_message()
+        buffer.set_message(None)
+        buffer.get_mosaics()
+        buffer.set_mosaics(None)
 
     def test_load_from_binary_initializes_from_binary_data(self):
         mosaic_buffer1 = generated_python.MosaicBuffer()
         mosaic_buffer1.mosaicId = bytearray(bytes([0xF2, 0x26, 0x6C, 0x06, 0x40, 0x83, 0xB2, 0x92]))
         mosaic_buffer1.amount = bytearray(bytes([0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44]))
-        mosaic1 = mosaic_buffer1.serialize()
 
         mosaic_buffer2 = generated_python.MosaicBuffer()
         mosaic_buffer2.mosaicId = bytearray(bytes([0xF2, 0x26, 0x6C, 0x06, 0x40, 0x83, 0xB2, 0x92]))
         mosaic_buffer2.amount = bytearray(bytes([0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44]))
-        mosaic2 = mosaic_buffer2.serialize()
 
         size_buffer = bytes([0xF2, 0x26, 0x6C, 0x06])
         signer_buffer = bytes([0x3E, 0xE9, 0xFA, 0x15, 0xA3, 0xB6, 0x05, 0xDC, 0x0C, 0x4C, 0xF7, 0xF1, 0xB1,
@@ -696,7 +707,6 @@ class TestEmbeddedTransferTransactionBufferClass(unittest.TestCase):
         mosaics_count_buffer = bytes([0x02])
         message_buffer = bytes([0x05, 0xDC, 0x05, 0xDC, 0x05, 0xDC, 0x05, 0xDC, 0x05, 0xDC, 0x05, 0xDC,
                                 0x05, 0xDC, 0x05, 0xDC, 0x05, 0xDC])
-        mosaics_buffer = mosaic1 + mosaic2
 
         consumable_buffer = generated_python.Uint8ArrayConsumableBuffer(
             bytearray(
@@ -708,7 +718,8 @@ class TestEmbeddedTransferTransactionBufferClass(unittest.TestCase):
                 + message_size_buffer
                 + mosaics_count_buffer
                 + message_buffer
-                + mosaics_buffer))
+                + mosaic_buffer1.serialize()
+                + mosaic_buffer2.serialize()))
 
         buffer = generated_python.EmbeddedTransferTransactionBuffer.load_from_binary(consumable_buffer)
         self.assertEqual(buffer.size, size_buffer)
@@ -718,20 +729,18 @@ class TestEmbeddedTransferTransactionBufferClass(unittest.TestCase):
         self.assertEqual(buffer.recipient, recipient_buffer)
         self.assertEqual(buffer.message, message_buffer)
         self.assertEqual(len(buffer.mosaics), 2)
-        self.assertEqual(buffer.mosaics[0].serialize(), mosaic1)
-        self.assertEqual(buffer.mosaics[1].serialize(), mosaic2)
+        self.assertEqual(buffer.mosaics[0].serialize(), mosaic_buffer1.serialize())
+        self.assertEqual(buffer.mosaics[1].serialize(), mosaic_buffer2.serialize())
         self.assertEqual(len(consumable_buffer.binary), consumable_buffer.offset)
 
     def test_serialize_outputs_a_valid_formatted_buffer(self):
         mosaic_buffer1 = generated_python.MosaicBuffer()
         mosaic_buffer1.mosaicId = bytearray(bytes([0xF2, 0x26, 0x6C, 0x06, 0x40, 0x83, 0xB2, 0x92]))
         mosaic_buffer1.amount = bytearray(bytes([0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44]))
-        mosaic1 = mosaic_buffer1.serialize()
 
         mosaic_buffer2 = generated_python.MosaicBuffer()
         mosaic_buffer2.mosaicId = bytearray(bytes([0xF2, 0x26, 0x6C, 0x06, 0x40, 0x83, 0xB2, 0x92]))
         mosaic_buffer2.amount = bytearray(bytes([0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44, 0x44]))
-        mosaic2 = mosaic_buffer2.serialize()
 
         size_buffer = bytes([0xF2, 0x26, 0x6C, 0x06])
         signer_buffer = bytes([0x3E, 0xE9, 0xFA, 0x15, 0xA3, 0xB6, 0x05, 0xDC, 0x0C, 0x4C, 0xF7, 0xF1, 0xB1,
@@ -746,7 +755,6 @@ class TestEmbeddedTransferTransactionBufferClass(unittest.TestCase):
         mosaics_count_buffer = bytes([0x02])
         message_buffer = bytes([0x05, 0xDC, 0x05, 0xDC, 0x05, 0xDC, 0x05, 0xDC, 0x05, 0xDC, 0x05, 0xDC,
                                 0x05, 0xDC, 0x05, 0xDC, 0x05, 0xDC])
-        mosaics_buffer = mosaic1 + mosaic2
 
         buffer = generated_python.EmbeddedTransferTransactionBuffer()
         buffer.size = size_buffer
@@ -767,7 +775,8 @@ class TestEmbeddedTransferTransactionBufferClass(unittest.TestCase):
                          + message_size_buffer
                          + mosaics_count_buffer
                          + message_buffer
-                         + mosaics_buffer)
+                         + mosaic_buffer1.serialize()
+                         + mosaic_buffer2.serialize())
 
 
 if __name__ == '__main__':
