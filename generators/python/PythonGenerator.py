@@ -26,6 +26,7 @@ def _get_attribute_name_if_sizeof(attribute_name, attributes):
 
 
 class PythonMethodGenerator:
+
     def __init__(self, name, params, static=False, is_class=False):
         self.name = name
         copied_params = copy.deepcopy(params)
@@ -125,7 +126,8 @@ class PythonGenerator:
         for attribute in attributes:
             if 'disposition' in attribute:
                 if attribute['disposition'] == TypeDescriptorDisposition.Inline.value:
-                    self._recurse_inlines(generate_attribute_method, self.schema[attribute['type']]['layout'], class_attributes)
+                    self._recurse_inlines(generate_attribute_method, self.schema[attribute['type']]['layout'],
+                                          class_attributes)
                 elif attribute['disposition'] == TypeDescriptorDisposition.Const.value:
                     pass
             else:
@@ -284,6 +286,22 @@ class PythonGenerator:
         self._generate_serialize_method(schema['layout'])
         return self.new_class.get_class()
 
+    def _generate_uint8_array_consumer(self):
+        self.consumer_class = PythonClassGenerator('Uint8ArrayConsumable')
+        self.consumer_class.add_constructor({'offset': 0, 'binary': 'binary'}, ['binary'])
+
+        get_bytes_method = PythonMethodGenerator('get_bytes', ['count'], is_class=True)
+        get_bytes_method.add_instructions([
+            'if (count + self.offset) > len(self.binary):',
+            indent('raise IndexError'),
+            'bytes = self.binary[self.offset:self.offset + count]',
+            'self.offset += count',
+            'return bytes',
+        ])
+        self.consumer_class.add_method(get_bytes_method)
+
+        return self.consumer_class.get_class()
+
     @staticmethod
     def _generate_concat_typed_arrays():
         method = PythonMethodGenerator('concat_typed_arrays', ['array1', 'array2'])
@@ -325,22 +343,6 @@ class PythonGenerator:
             'return array'
         ])
         return method.get_method()
-
-    def _generate_uint8_array_consumer(self):
-        self.consumer_class = PythonClassGenerator('Uint8ArrayConsumable')
-        self.consumer_class.add_constructor({'offset': 0, 'binary': 'binary'}, ['binary'])
-
-        get_bytes_method = PythonMethodGenerator('get_bytes', ['count'], is_class=True)
-        get_bytes_method.add_instructions([
-            'if (count + self.offset) > len(self.binary):',
-            indent('raise IndexError'),
-            'bytes = self.binary[self.offset:self.offset + count]',
-            'self.offset += count',
-            'return bytes',
-        ])
-        self.consumer_class.add_method(get_bytes_method)
-
-        return self.consumer_class.get_class()
 
     def generate(self):
 
