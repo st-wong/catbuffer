@@ -27,15 +27,14 @@ def _get_attribute_name_if_sizeof(attribute_name, attributes):
 
 class PythonMethodGenerator:
 
-    def __init__(self, name, params, static=False, is_class=False):
+    def __init__(self, name, params, decorator=None, is_class=False):
         self.name = name
         copied_params = copy.deepcopy(params)
         if is_class:
             copied_params.insert(0, 'self')
-        if static:
-            self.method_output = ['@staticmethod', 'def {}({}):'.format(self.name, ', '.join(copied_params))]
-        else:
-            self.method_output = ['def {}({}):'.format(self.name, ', '.join(copied_params))]
+        self.method_output = ['def {}({}):'.format(self.name, ', '.join(copied_params))]
+        if decorator:
+            self.method_output.insert(0, decorator)
 
     def add_instructions(self, instructions):
         for instruction in instructions:
@@ -50,14 +49,6 @@ class PythonClassGenerator:
     def get_generated_class_name(name):
         return '{}Buffer'.format(name)
 
-    @staticmethod
-    def get_generated_getter_name(attribute):
-        return 'get_{}'.format(attribute.lower())
-
-    @staticmethod
-    def get_generated_setter_name(attribute):
-        return 'set_{}'.format(attribute.lower())
-
     def __init__(self, name):
         self.class_name = PythonClassGenerator.get_generated_class_name(name)
         self.class_output = ['class {}:'.format(self.class_name)]
@@ -70,17 +61,14 @@ class PythonClassGenerator:
         self.class_output += [''] + new_constructor
 
     def _add_getter(self, attribute):
-        new_getter = PythonMethodGenerator(
-            PythonClassGenerator.get_generated_getter_name(attribute), [], is_class=True)
-        new_getter.add_instructions(['return self.{0}'.format(attribute)])
+        new_getter = PythonMethodGenerator('{}'.format(attribute), [], decorator='@property', is_class=True)
+        new_getter.add_instructions(['return self._{0}'.format(attribute)])
         self.add_method(new_getter)
 
     def _add_setter(self, attribute):
         new_setter = PythonMethodGenerator(
-            PythonClassGenerator.get_generated_setter_name(attribute),
-            [attribute],
-            is_class=True)
-        new_setter.add_instructions(['self.{0} = {0}'.format(attribute)])
+            '{}'.format(attribute), [attribute], decorator='@{}.setter'.format(attribute), is_class=True)
+        new_setter.add_instructions(['self._{0} = {0}'.format(attribute)])
         self.add_method(new_setter)
 
     def add_getter_setter(self, attribute):
@@ -194,7 +182,8 @@ class PythonGenerator:
                     self.load_from_binary_method.add_instructions(['object.{0} = {0}'.format(attribute['name'])])
 
     def _generate_load_from_binary_method(self, attributes):
-        self.load_from_binary_method = PythonMethodGenerator('load_from_binary', ['consumable_buffer'], True)
+        self.load_from_binary_method = PythonMethodGenerator(
+            'load_from_binary', ['consumable_buffer'], decorator='@staticmethod')
         self.load_from_binary_method.add_instructions(['object = {}()'.format(self.new_class.class_name)])
         self._recurse_inlines(self._generate_load_from_binary_attributes, attributes, [])
         self.load_from_binary_method.add_instructions(['return object'])
@@ -271,7 +260,7 @@ class PythonGenerator:
 
     def _generate_constructor(self, attributes):
         class_attributes = self._recurse_inlines(None, attributes, [])
-        initial_values = {attribute['name']: None for attribute in class_attributes}
+        initial_values = {'_' + attribute['name']: None for attribute in class_attributes}
         self.new_class.add_constructor(initial_values, [])
 
     def _generate_attributes(self, attribute, sizeof_attribute_name):

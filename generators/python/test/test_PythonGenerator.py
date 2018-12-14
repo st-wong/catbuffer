@@ -156,13 +156,10 @@ class TestUint8ArrayConsumableBufferClass(unittest.TestCase):
 
 class TestMosaicBufferClass(unittest.TestCase):
 
-    @staticmethod
-    def test_has_required_getters_and_setters():
+    def test_has_required_class_attributes(self):
         buffer = generated_python.MosaicBuffer()
-        buffer.get_mosaicid()
-        buffer.set_mosaicid(None)
-        buffer.get_amount()
-        buffer.set_amount(None)
+        self.assertTrue(hasattr(buffer, 'mosaicId'))
+        self.assertTrue(hasattr(buffer, 'amount'))
 
     def test_load_from_binary_initializes_from_binary_data(self):
         mosaic_id_buffer = bytes([0xF2, 0x26, 0x6C, 0x06, 0x40, 0x83, 0xB2, 0x92])
@@ -185,17 +182,14 @@ class TestMosaicBufferClass(unittest.TestCase):
         buffer.mosaicId = mosaic_id_buffer
         buffer.amount = mosaic_amount_buffer
 
-        serialized_data = buffer.serialize()
-        self.assertEqual(serialized_data, mosaic_id_buffer + mosaic_amount_buffer)
+        self.assertEqual(buffer.serialize(), mosaic_id_buffer + mosaic_amount_buffer)
 
 
 class TestSizePrefixedEntityBufferClass(unittest.TestCase):
 
-    @staticmethod
-    def test_has_required_getters_and_setters():
+    def test_has_required_class_attributes(self):
         buffer = generated_python.SizePrefixedEntityBuffer()
-        buffer.get_size()
-        buffer.set_size(None)
+        self.assertTrue(hasattr(buffer, 'size'))
 
     def test_load_from_binary_initializes_from_binary_data(self):
         size_buffer = bytes([0xF2, 0x26, 0x6C, 0x06])
@@ -206,19 +200,17 @@ class TestSizePrefixedEntityBufferClass(unittest.TestCase):
 
     def test_serialize_outputs_a_valid_formatted_buffer(self):
         size_buffer = bytes([0xF2, 0x26, 0x6C, 0x06])
+
         buffer = generated_python.SizePrefixedEntityBuffer()
         buffer.size = size_buffer
-        serialized_data = buffer.serialize()
-        self.assertEqual(serialized_data, size_buffer)
+        self.assertEqual(buffer.serialize(), size_buffer)
 
 
 class VerifiableEntityBufferClass(unittest.TestCase):
 
-    @staticmethod
-    def test_has_required_getters_and_setters():
+    def test_has_required_class_attributes(self):
         buffer = generated_python.VerifiableEntityBuffer()
-        buffer.get_signature()
-        buffer.set_signature(None)
+        self.assertTrue(hasattr(buffer, 'signature'))
 
     def test_load_from_binary_initializes_from_binary_data(self):
         signature_buffer = bytes([
@@ -242,21 +234,17 @@ class VerifiableEntityBufferClass(unittest.TestCase):
 
         buffer = generated_python.VerifiableEntityBuffer()
         buffer.signature = signature_buffer
-        serialized_data = buffer.serialize()
-        self.assertEqual(serialized_data, signature_buffer)
+
+        self.assertEqual(buffer.serialize(), signature_buffer)
 
 
 class EntityBodyBufferClass(unittest.TestCase):
 
-    @staticmethod
-    def test_has_required_getters_and_setters():
+    def test_has_required_class_attributes(self):
         buffer = generated_python.EntityBodyBuffer()
-        buffer.get_signer()
-        buffer.set_signer(None)
-        buffer.get_version()
-        buffer.set_version(None)
-        buffer.get_type()
-        buffer.set_type(None)
+        self.assertTrue(hasattr(buffer, 'signer'))
+        self.assertTrue(hasattr(buffer, 'version'))
+        self.assertTrue(hasattr(buffer, 'type'))
 
     def test_load_from_binary_initializes_from_binary_data(self):
         signer_buffer = bytes([0xF5, 0x24, 0x8C, 0xB0, 0x05, 0x49, 0xC6, 0x15, 0xFC, 0x56, 0x13, 0x08, 0xE3,
@@ -287,29 +275,21 @@ class EntityBodyBufferClass(unittest.TestCase):
         buffer.signer = signer_buffer
         buffer.version = version_buffer
         buffer.type = type_buffer
-        serialized_data = buffer.serialize()
-        self.assertEqual(serialized_data, signer_buffer + version_buffer + type_buffer)
+
+        self.assertEqual(buffer.serialize(), signer_buffer + version_buffer + type_buffer)
 
 
 class TransactionBufferClass(unittest.TestCase):
 
-    @staticmethod
-    def test_has_required_getters_and_setters():
+    def test_has_required_class_attributes(self):
         buffer = generated_python.TransactionBuffer()
-        buffer.get_size()
-        buffer.set_size(None)
-        buffer.get_signature()
-        buffer.set_signature(None)
-        buffer.get_signer()
-        buffer.set_signer(None)
-        buffer.get_version()
-        buffer.set_version(None)
-        buffer.get_type()
-        buffer.set_type(None)
-        buffer.get_fee()
-        buffer.set_fee(None)
-        buffer.get_deadline()
-        buffer.set_deadline(None)
+        self.assertTrue(hasattr(buffer, 'size'))
+        self.assertTrue(hasattr(buffer, 'signature'))
+        self.assertTrue(hasattr(buffer, 'signer'))
+        self.assertTrue(hasattr(buffer, 'version'))
+        self.assertTrue(hasattr(buffer, 'type'))
+        self.assertTrue(hasattr(buffer, 'fee'))
+        self.assertTrue(hasattr(buffer, 'deadline'))
 
     def test_load_from_binary_initializes_from_binary_data(self):
         size_buffer = bytes([0xF2, 0x26, 0x6C, 0x06])
@@ -370,9 +350,7 @@ class TransactionBufferClass(unittest.TestCase):
         buffer.fee = fee_buffer
         buffer.deadline = deadline_buffer
 
-        serialized_data = buffer.serialize()
-
-        self.assertEqual(serialized_data, size_buffer
+        self.assertEqual(buffer.serialize(), size_buffer
                          + signature_buffer
                          + signer_buffer
                          + version_buffer
@@ -383,17 +361,12 @@ class TransactionBufferClass(unittest.TestCase):
 
 class EmbeddedTransactionBufferClass(unittest.TestCase):
 
-    @staticmethod
-    def test_has_required_getters_and_setters():
+    def test_has_required_class_attributes(self):
         buffer = generated_python.EmbeddedTransactionBuffer()
-        buffer.get_size()
-        buffer.set_size(None)
-        buffer.get_signer()
-        buffer.set_signer(None)
-        buffer.get_version()
-        buffer.set_version(None)
-        buffer.get_type()
-        buffer.set_type(None)
+        self.assertTrue(hasattr(buffer, 'size'))
+        self.assertTrue(hasattr(buffer, 'signer'))
+        self.assertTrue(hasattr(buffer, 'version'))
+        self.assertTrue(hasattr(buffer, 'type'))
 
     def test_load_from_binary_initializes_from_binary_data(self):
         size_buffer = bytes([0xF2, 0x26, 0x6C, 0x06])
@@ -430,21 +403,16 @@ class EmbeddedTransactionBufferClass(unittest.TestCase):
         buffer.version = version_buffer
         buffer.type = type_buffer
 
-        serialized_data = buffer.serialize()
-        self.assertEqual(serialized_data, size_buffer + signer_buffer + version_buffer + type_buffer)
+        self.assertEqual(buffer.serialize(), size_buffer + signer_buffer + version_buffer + type_buffer)
 
 
 class TransferTransactionBodyBufferClass(unittest.TestCase):
 
-    @staticmethod
-    def test_has_required_getters_and_setters():
+    def test_has_required_class_attributes(self):
         buffer = generated_python.TransferTransactionBodyBuffer()
-        buffer.get_recipient()
-        buffer.set_recipient(None)
-        buffer.get_message()
-        buffer.set_message(None)
-        buffer.get_mosaics()
-        buffer.set_mosaics(None)
+        self.assertTrue(hasattr(buffer, 'recipient'))
+        self.assertTrue(hasattr(buffer, 'message'))
+        self.assertTrue(hasattr(buffer, 'mosaics'))
 
     def test_load_from_binary_initializes_from_binary_data(self):
         mosaic_buffer1 = generated_python.MosaicBuffer()
@@ -510,8 +478,7 @@ class TransferTransactionBodyBufferClass(unittest.TestCase):
         buffer.message = message_buffer
         buffer.mosaics = [mosaic_buffer1, mosaic_buffer2]
 
-        serialize_data = buffer.serialize()
-        self.assertEqual(serialize_data, recipient_buffer
+        self.assertEqual(buffer.serialize(), recipient_buffer
                          + message_size_buffer
                          + mosaics_count_buffer
                          + message_buffer
@@ -521,29 +488,18 @@ class TransferTransactionBodyBufferClass(unittest.TestCase):
 
 class TestTransferTransactionBufferClass(unittest.TestCase):
 
-    @staticmethod
-    def test_has_required_getters_and_setters():
+    def test_has_required_class_attributes(self):
         buffer = generated_python.TransferTransactionBuffer()
-        buffer.get_size()
-        buffer.set_size(None)
-        buffer.get_signature()
-        buffer.set_signature(None)
-        buffer.get_signer()
-        buffer.set_signer(None)
-        buffer.get_version()
-        buffer.set_version(None)
-        buffer.get_type()
-        buffer.set_type(None)
-        buffer.get_fee()
-        buffer.set_fee(None)
-        buffer.get_deadline()
-        buffer.set_deadline(None)
-        buffer.get_recipient()
-        buffer.set_recipient(None)
-        buffer.get_message()
-        buffer.set_message(None)
-        buffer.get_mosaics()
-        buffer.set_mosaics(None)
+        self.assertTrue(hasattr(buffer, 'size'))
+        self.assertTrue(hasattr(buffer, 'signature'))
+        self.assertTrue(hasattr(buffer, 'signer'))
+        self.assertTrue(hasattr(buffer, 'version'))
+        self.assertTrue(hasattr(buffer, 'type'))
+        self.assertTrue(hasattr(buffer, 'fee'))
+        self.assertTrue(hasattr(buffer, 'deadline'))
+        self.assertTrue(hasattr(buffer, 'recipient'))
+        self.assertTrue(hasattr(buffer, 'message'))
+        self.assertTrue(hasattr(buffer, 'mosaics'))
 
     def test_load_from_binary_initializes_from_binary_data(self):
         mosaic_buffer1 = generated_python.MosaicBuffer()
@@ -648,8 +604,7 @@ class TestTransferTransactionBufferClass(unittest.TestCase):
         buffer.message = message_buffer
         buffer.mosaics = [mosaic_buffer1, mosaic_buffer2]
 
-        serialized_data = buffer.serialize()
-        self.assertEqual(serialized_data,
+        self.assertEqual(buffer.serialize(),
                          size_buffer
                          + signature_buffer
                          + signer_buffer
@@ -667,23 +622,15 @@ class TestTransferTransactionBufferClass(unittest.TestCase):
 
 class TestEmbeddedTransferTransactionBufferClass(unittest.TestCase):
 
-    @staticmethod
-    def test_has_required_getters_and_setters():
+    def test_has_required_class_attributes(self):
         buffer = generated_python.EmbeddedTransferTransactionBuffer()
-        buffer.get_size()
-        buffer.set_size(None)
-        buffer.get_signer()
-        buffer.set_signer(None)
-        buffer.get_version()
-        buffer.set_version(None)
-        buffer.get_type()
-        buffer.set_type(None)
-        buffer.get_recipient()
-        buffer.set_recipient(None)
-        buffer.get_message()
-        buffer.set_message(None)
-        buffer.get_mosaics()
-        buffer.set_mosaics(None)
+        self.assertTrue(hasattr(buffer, 'size'))
+        self.assertTrue(hasattr(buffer, 'signer'))
+        self.assertTrue(hasattr(buffer, 'version'))
+        self.assertTrue(hasattr(buffer, 'type'))
+        self.assertTrue(hasattr(buffer, 'recipient'))
+        self.assertTrue(hasattr(buffer, 'message'))
+        self.assertTrue(hasattr(buffer, 'mosaics'))
 
     def test_load_from_binary_initializes_from_binary_data(self):
         mosaic_buffer1 = generated_python.MosaicBuffer()
@@ -765,8 +712,7 @@ class TestEmbeddedTransferTransactionBufferClass(unittest.TestCase):
         buffer.message = message_buffer
         buffer.mosaics = [mosaic_buffer1, mosaic_buffer2]
 
-        serialized_data = buffer.serialize()
-        self.assertEqual(serialized_data,
+        self.assertEqual(buffer.serialize(),
                          size_buffer
                          + signer_buffer
                          + version_buffer
