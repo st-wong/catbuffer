@@ -38,7 +38,7 @@ The [schemas](schemas) define the entities data structure. The library generates
 python main.py --schema schemas/transfer/transfer.cats --generator cpp_builder
 ```
 
-The generator creates a new file under ``_generated/cp_builder`` folder.
+The generator creates a new file under ``_generated/cpp_builder`` folder.
 
 ### Run the linter
 ```
